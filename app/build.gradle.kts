@@ -1,6 +1,8 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
+    id("kotlin-kapt")
+    id("com.google.dagger.hilt.android")
 }
 
 android {
@@ -19,14 +21,23 @@ android {
             useSupportLibrary = true
         }
     }
+    android.buildFeatures.buildConfig = true
 
     buildTypes {
         release {
             isMinifyEnabled = false
+            isDebuggable = false
+            buildConfigField("String", "baseUrl", "\"https://food-delivery.umain.io/api/v1/\"")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+        }
+        debug {
+            isMinifyEnabled = false
+            isDebuggable = true
+            buildConfigField("String", "baseUrl", "\"https://food-delivery.umain.io/api/v1/\"")
+            applicationIdSuffix = ".debug"
         }
     }
     compileOptions {
@@ -68,4 +79,15 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.gson)
+    implementation(platform(libs.okhttp.bom))
+    implementation(libs.okhttp)
+    implementation(libs.okhttp.logging.interceptor)
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.android.compiler)
+    implementation(libs.hilt.navigation.compose)
+}
+kapt {
+    correctErrorTypes = true
 }
