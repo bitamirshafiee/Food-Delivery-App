@@ -87,6 +87,8 @@ dependencies {
     implementation(libs.hilt.android)
     kapt(libs.hilt.android.compiler)
     implementation(libs.hilt.navigation.compose)
+    testImplementation(libs.coroutines.test)
+    testImplementation(libs.mockk)
 }
 kapt {
     correctErrorTypes = true
