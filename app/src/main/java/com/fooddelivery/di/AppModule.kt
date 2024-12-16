@@ -19,17 +19,7 @@ import javax.inject.Qualifier
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
-@Retention(AnnotationRetention.BINARY)
-@Qualifier
-annotation class IoDispatcher
 
-@Retention(AnnotationRetention.BINARY)
-@Qualifier
-annotation class DefaultDispatcher
-
-@Retention
-@Qualifier
-annotation class MainDispatcher
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -61,22 +51,6 @@ class AppModule {
     @Singleton
     fun provideServiceProvider(retrofit: Retrofit): ServiceProvider = ServiceProvider(retrofit)
 
-    @Provides
-    @IoDispatcher
-    fun provideIoDispatcher(): CoroutineDispatcher = Dispatchers.IO
 
-    @Provides
-    @DefaultDispatcher
-    fun provideDefaultDispatcher(): CoroutineDispatcher = Dispatchers.Default
 
-    @Provides
-    @MainDispatcher
-    fun provideMainDispatcher(): CoroutineDispatcher = Dispatchers.Main
-
-    @Provides
-    @Singleton
-    fun provideRestaurantRepository(
-        serviceProvider: ServiceProvider
-    ): RestaurantRepository =
-        RestaurantRepositoryImpl(serviceProvider)
 }

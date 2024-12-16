@@ -3,7 +3,7 @@ package com.fooddelivery.ui.restaurantlist
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.fooddelivery.data.repository.RestaurantRepository
-import com.weatherapp.repository.NetworkResult
+import com.fooddelivery.data.repository.NetworkResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow

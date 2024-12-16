@@ -1,4 +1,4 @@
-package com.weatherapp.repository
+package com.fooddelivery.data.repository
 
 sealed class NetworkResult<T> {
     data class Success<T>(val data: T) : NetworkResult<T>()
