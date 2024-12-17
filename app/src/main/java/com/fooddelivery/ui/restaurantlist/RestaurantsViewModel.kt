@@ -52,7 +52,6 @@ class RestaurantsViewModel @Inject constructor(private val repository: Restauran
                     _restaurants.value
                 }
 
-                else -> {}
             }
 
         }

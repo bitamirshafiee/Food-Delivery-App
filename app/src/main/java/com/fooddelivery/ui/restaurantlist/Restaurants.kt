@@ -1,6 +1,7 @@
 package com.fooddelivery.ui.restaurantlist
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,25 +20,30 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import coil3.compose.AsyncImage
 import com.fooddelivery.R
-import com.fooddelivery.data.model.RestaurantResponse
 
 
 @Composable
-fun Restaurants(viewModel: RestaurantsViewModel) {
+fun Restaurants(
+    viewModel: RestaurantsViewModel, navigateToRestaurantDetails: (restaurant: Restaurant) -> Unit
+) {
 
     val restaurants by viewModel.restaurants.collectAsState()
 
     LazyColumn {
         items(items = restaurants) { restaurant: Restaurant ->
-            RestaurantItem(restaurant = restaurant)
+            RestaurantItem(restaurant = restaurant, navigate = navigateToRestaurantDetails)
         }
     }
 
 }
 
 @Composable
-fun RestaurantItem(restaurant: Restaurant) {
-    Column(modifier = Modifier.fillMaxWidth()) {
+fun RestaurantItem(
+    restaurant: Restaurant, navigate: (restaurant: Restaurant) -> Unit
+) {
+    Column(modifier = Modifier
+        .fillMaxWidth()
+        .clickable { navigate(restaurant) }) {
         AsyncImage(
             model = restaurant.imageUrl,
             contentDescription = null,
@@ -51,8 +57,7 @@ fun RestaurantItem(restaurant: Restaurant) {
                 .align(Alignment.CenterHorizontally)
         ) {
             Text(
-                text = restaurant.name,
-                Modifier.weight(1f)
+                text = restaurant.name, Modifier.weight(1f)
             )
 
             Row(modifier = Modifier) {
@@ -102,16 +107,14 @@ fun Filter() {
 @Preview
 @Composable
 fun RestaurantPreview() {
-    RestaurantItem(
-        Restaurant(
-            imageUrl = "",
-            rating = 2.5,
-            filterIds = listOf(),
-            tags = listOf(),
-            name = "bita",
-            deliveryTime = 12
-        )
-    )
+    RestaurantItem(Restaurant(
+        imageUrl = "",
+        rating = 2.5,
+        filterIds = listOf(),
+        tags = listOf(),
+        name = "bita",
+        deliveryTime = 12
+    ), {})
 }
 
 @Preview
