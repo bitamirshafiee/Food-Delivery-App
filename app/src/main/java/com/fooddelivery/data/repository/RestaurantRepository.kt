@@ -1,5 +1,6 @@
 package com.fooddelivery.data.repository
 
+import com.fooddelivery.data.model.RestaurantStatusResponse
 import com.fooddelivery.data.model.RestaurantsResponse
 import com.fooddelivery.data.model.TagResponse
 import com.fooddelivery.data.service.ServiceProvider
@@ -15,11 +16,9 @@ abstract class RestaurantRepository {
 
     abstract suspend fun getRestaurants(): NetworkResult<RestaurantsResponse>
     abstract suspend fun getTags(tagIds: List<String>): List<Deferred<TagResponse>>
+    abstract suspend fun isOpen(id: String): NetworkResult<RestaurantStatusResponse>
 }
 
-
-//TODO add dispatcher parameter
-//https://developer.android.com/kotlin/coroutines/coroutines-best-practices
 class RestaurantRepositoryImpl @Inject constructor(
     serviceProvider: ServiceProvider,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher
@@ -30,7 +29,7 @@ class RestaurantRepositoryImpl @Inject constructor(
 
     override suspend fun getRestaurants(): NetworkResult<RestaurantsResponse> {
 
-        return withContext(ioDispatcher){
+        return withContext(ioDispatcher) {
             try {
                 NetworkResult.Success(restaurantService.getRestaurants())
             } catch (exception: Exception) {
@@ -39,12 +38,22 @@ class RestaurantRepositoryImpl @Inject constructor(
         }
     }
 
-     override suspend fun getTags(tagIds: List<String>): List<Deferred<TagResponse>> =
-         coroutineScope {
-             tagIds.map {
-                 async(ioDispatcher) { restaurantService.getTag(it) }
-             }
-         }
+    override suspend fun getTags(tagIds: List<String>): List<Deferred<TagResponse>> =
+        coroutineScope {
+            tagIds.map {
+                async(ioDispatcher) { restaurantService.getTag(it) }
+            }
+        }
+
+    override suspend fun isOpen(id: String): NetworkResult<RestaurantStatusResponse> {
+        return withContext(ioDispatcher) {
+            try {
+                NetworkResult.Success(restaurantService.getRestaurantStatus(id))
+            } catch (exception: Exception) {
+                NetworkResult.Failure(exception)
+            }
+        }
+    }
 
 
 }
