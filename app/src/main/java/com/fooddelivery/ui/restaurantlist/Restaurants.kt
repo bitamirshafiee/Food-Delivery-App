@@ -20,7 +20,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import coil3.compose.AsyncImage
 import com.fooddelivery.R
-
+//TODO add modifier to funs
 
 @Composable
 fun Restaurants(

@@ -1,5 +1,6 @@
 package com.fooddelivery.ui.restaurantlist
 
+import android.os.Parcelable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.fooddelivery.data.repository.RestaurantRepository
@@ -9,6 +10,8 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.Serializable
 import javax.inject.Inject
 
 @HiltViewModel
@@ -57,7 +60,8 @@ class RestaurantsViewModel @Inject constructor(private val repository: Restauran
         }
     }
 }
-
+@Parcelize
+@Serializable
 data class Restaurant(
     val imageUrl: String,
     val rating: Double,
@@ -65,6 +69,7 @@ data class Restaurant(
     val tags: List<Tag> = listOf(),
     val name: String,
     val deliveryTime: Int
-)
-
-data class Tag(val imageUrl: String, val name: String)
+) :Parcelable
+@Parcelize
+@Serializable
+data class Tag(val imageUrl: String, val name: String) : Parcelable

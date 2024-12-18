@@ -1,6 +1,6 @@
 [versions]
 agp = "8.5.2"
-kotlin = "1.9.0"
+kotlin = "2.0.0"
 coreKtx = "1.13.1"
 junit = "4.13.2"
 junitVersion = "1.2.1"
@@ -16,6 +16,9 @@ hiltVersion = "2.51.1"
 hiltNavigationVersion = "1.2.0"
 coroutinesTestVersion = "1.9.0"
 mockkVersion ="1.13.13"
+kotlinSerializationVersion = "1.7.3"
+jvmVersion = "2.1.0"
+serializationVersion = "2.1.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -41,6 +44,7 @@ okhttp = { group = "com.squareup.okhttp3", name = "okhttp" }
 okhttp-logging-interceptor = { group = "com.squareup.okhttp3", name = "logging-interceptor" }
 coroutines-test ={group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutinesTestVersion" }
 mockk ={group = "io.mockk", name = "mockk", version.ref = "mockkVersion" }
+kotlin-serialization ={group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinSerializationVersion" }
 
 hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hiltVersion" }
 hilt-android-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hiltVersion" }
@@ -49,4 +53,10 @@ hilt-navigation-compose ={group = "androidx.hilt", name = "hilt-navigation-compo
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+jetbrains-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "jvmVersion" }
+jetbrains-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "serializationVersion" }
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+
+
+
 
