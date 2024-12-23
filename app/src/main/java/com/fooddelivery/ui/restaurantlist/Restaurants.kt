@@ -26,17 +26,30 @@ fun Restaurants(
     Column(modifier = Modifier.padding(horizontal = 16.dp)) {
         Logo()
         LazyRow(modifier = Modifier.padding(vertical = 16.dp)) {
-            items(items = tags) { tag: Tag ->
+            items(items = tags) { tagSelection: TagSelection ->
                 FilterItem(
-                    tag = tag,
-                    onClick = { tag -> viewModel.updateSelectedTags(listOf(tag)) })
+                    tagSelection = tagSelection,
+                    onFilterSelected = { selectedTag ->
+                        viewModel.addFilterToSelectedFilterList(
+                            selectedTag
+                        )
+                    },
+                    onFilterUnSelected = { unSelectedTag ->
+                        viewModel.removeFilterFromSelectedFilterList(
+                            unSelectedTag
+                        )
+                    })
             }
         }
         LazyColumn {
 
-            items(items = restaurants, key = {item -> item.id}) { restaurant: Restaurant ->
+            items(items = restaurants, key = { item -> item.id }) { restaurant: Restaurant ->
                 val modifier = Modifier.animateItem()
-                RestaurantItem(restaurant = restaurant, navigate = navigateToRestaurantDetails, modifier = modifier)
+                RestaurantItem(
+                    restaurant = restaurant,
+                    navigate = navigateToRestaurantDetails,
+                    modifier = modifier
+                )
             }
         }
     }

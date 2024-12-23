@@ -1,7 +1,6 @@
 package com.fooddelivery.ui.restaurantlist
 
 import android.os.Parcelable
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.fooddelivery.data.repository.RestaurantRepository
@@ -9,10 +8,9 @@ import com.fooddelivery.data.repository.NetworkResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
@@ -23,13 +21,11 @@ class RestaurantsViewModel @Inject constructor(private val repository: Restauran
     ViewModel() {
 
     private val _restaurants = MutableStateFlow(listOf<Restaurant>())
-    val restaurants: StateFlow<List<Restaurant>> = _restaurants
 
-    private val _tags = MutableStateFlow(listOf<Tag>())
-    val tags: StateFlow<List<Tag>> = _tags
+    private val _tags = MutableStateFlow(listOf<TagSelection>())
+    val tags: StateFlow<List<TagSelection>> = _tags
 
     private val _selectedTags = MutableStateFlow(listOf<Tag>())
-    val selectedTags: StateFlow<List<Tag>> = _selectedTags
 
     private val _filteredList = MutableStateFlow(listOf<Restaurant>())
     val filteredList: StateFlow<List<Restaurant>> = _filteredList
@@ -57,39 +53,67 @@ class RestaurantsViewModel @Inject constructor(private val repository: Restauran
                     _restaurants.value = mainResult
 
                     val updatedResultWithTags = mainResult.map { restaurant ->
-                        val tags = repository.getTags(restaurant.filterIds).awaitAll()
-                            .map { tag -> Tag(imageUrl = tag.imageUrl, name = tag.name) }
-
+                        val tags = repository.getTags(restaurant.filterIds).awaitAll().map { tag ->
+                            Tag(
+                                id = tag.id, imageUrl = tag.imageUrl, name = tag.name
+                            )
+                        }
                         restaurant.copy(tags = tags)
                     }
                     _restaurants.value = updatedResultWithTags
-                    _tags.value = updatedResultWithTags.map { it.tags }.flatten().distinct()
+                    _tags.value =
+                        updatedResultWithTags.map { restaurant -> restaurant.tags }.flatten()
+                            .distinct().map { TagSelection(tag = it) }
                 }
 
                 is NetworkResult.Failure -> {
                     _restaurants.value
                 }
-
             }
-
         }
     }
 
     private fun observeTagFilters() {
         viewModelScope.launch {
             combine(_restaurants, _selectedTags) { restaurants, selectedTags ->
-                if (selectedTags.isEmpty())
-                    restaurants
-                else
-                    restaurants.filter { it.tags.containsAll(selectedTags) }
+                if (selectedTags.isEmpty()) restaurants
+                else restaurants.filter { restaurant ->
+                    restaurant.tags.containsAll(
+                        selectedTags
+                    )
+                }
             }.collect { filteredList ->
                 _filteredList.value = filteredList
             }
         }
     }
 
-    fun updateSelectedTags(newTags: List<Tag>) {
-        _selectedTags.value = newTags
+    fun addFilterToSelectedFilterList(tagSelection: TagSelection) {
+        updateFilters(tagSelection)
+        val list = _selectedTags.value
+        if (!list.contains(tagSelection.tag)) {
+            _selectedTags.value = list + tagSelection.tag
+        }
+    }
+
+    fun removeFilterFromSelectedFilterList(tagSelection: TagSelection) {
+        updateFilters(tagSelection)
+        val list = _selectedTags.value
+        if (list.contains(tagSelection.tag)) {
+            _selectedTags.value = list - tagSelection.tag
+        }
+    }
+
+    private fun updateFilters(tagSelection: TagSelection) {
+        _tags.update { currentList ->
+            currentList.map { item ->
+                if (item.tag.id == tagSelection.tag.id) {
+                    item.copy(isSelected = tagSelection.isSelected)
+                } else {
+                    item
+                }
+            }
+        }
     }
 }
 
@@ -107,4 +131,8 @@ data class Restaurant(
 
 @Parcelize
 @Serializable
-data class Tag(val imageUrl: String, val name: String, val isSelected: Boolean = false) : Parcelable
+data class Tag(val id: String, val imageUrl: String, val name: String) : Parcelable
+
+data class TagSelection(
+    val tag: Tag, var isSelected: Boolean = false
+)

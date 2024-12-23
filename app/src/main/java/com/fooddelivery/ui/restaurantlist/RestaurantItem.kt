@@ -118,10 +118,10 @@ fun RestaurantRating(rating: Double, modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun RestaurantTags(tags: List<Tag>, modifier: Modifier = Modifier) {
+fun RestaurantTags(tagSelections: List<Tag>, modifier: Modifier = Modifier) {
     Text(
         modifier = modifier,
-        text = separateListWithDots(tags.map { it.name }),
+        text = separateListWithDots(tagSelections.map { it.name }),
         fontSize = 12.sp,
         color = Color(0xFF999999)
     )
