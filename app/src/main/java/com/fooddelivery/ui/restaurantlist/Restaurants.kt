@@ -1,123 +1,109 @@
 package com.fooddelivery.ui.restaurantlist
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
-import coil3.compose.AsyncImage
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.fooddelivery.R
-//TODO add modifier to funs
+import com.fooddelivery.ui.commonui.ScreenError
+import com.fooddelivery.ui.commonui.ScreenLoading
 
 @Composable
 fun Restaurants(
     viewModel: RestaurantsViewModel, navigateToRestaurantDetails: (restaurant: Restaurant) -> Unit
 ) {
 
-    val restaurants by viewModel.restaurants.collectAsState()
+    val restaurantsUIState by viewModel.state.collectAsStateWithLifecycle()
 
-    LazyColumn {
-        items(items = restaurants) { restaurant: Restaurant ->
-            RestaurantItem(restaurant = restaurant, navigate = navigateToRestaurantDetails)
+    when (val uiState = restaurantsUIState) {
+        is RestaurantsUIState.Loading -> {
+            ScreenLoading()
+        }
+
+        is RestaurantsUIState.Error -> {
+            ScreenError(onRetry = viewModel::onRetry, errorMessage = uiState.errorMessage)
+        }
+
+        is RestaurantsUIState.Restaurants -> {
+            RestaurantsAndTags(
+                restaurants = uiState.restaurants,
+                tags = uiState.tags,
+                addFilter = { tag -> viewModel.addFilterToSelectedFilterList(tag) },
+                removeFilter = { tag -> viewModel.removeFilterFromSelectedFilterList(tag) },
+                navigateToRestaurantDetails = navigateToRestaurantDetails
+            )
         }
     }
 
 }
 
 @Composable
-fun RestaurantItem(
-    restaurant: Restaurant, navigate: (restaurant: Restaurant) -> Unit
+fun RestaurantsAndTags(
+    tags: List<TagSelection>,
+    restaurants: List<Restaurant>,
+    addFilter: (TagSelection) -> Unit,
+    removeFilter: (TagSelection) -> Unit,
+    navigateToRestaurantDetails: (restaurant: Restaurant) -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    Column(modifier = Modifier
-        .fillMaxWidth()
-        .clickable { navigate(restaurant) }) {
-        AsyncImage(
-            model = restaurant.imageUrl,
-            contentDescription = null,
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(color = Color.Red)
-        )
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .align(Alignment.CenterHorizontally)
-        ) {
-            Text(
-                text = restaurant.name, Modifier.weight(1f)
-            )
+    Column(modifier = modifier.padding(horizontal = 16.dp)) {
+        Logo()
+        TagList(tags = tags,
+            addFilter = { tag -> addFilter(tag) },
+            removeFilter = { tag -> removeFilter(tag) })
+        RestaurantList(restaurants, navigateToRestaurantDetails)
+    }
+}
 
-            Row(modifier = Modifier) {
-                Icon(painter = painterResource(id = R.drawable.ic_star), contentDescription = null)
-                Text(
-                    text = restaurant.rating.toString()
-                )
-            }
-        }
-        LazyRow() {
-            items(items = restaurant.tags) { tag: Tag ->
-                Text(
-                    text = tag.name
-                )
-            }
-        }
+@Composable
+private fun RestaurantList(
+    restaurants: List<Restaurant>,
+    navigateToRestaurantDetails: (restaurant: Restaurant) -> Unit,
+) {
+    LazyColumn {
 
-        Row(modifier = Modifier) {
-            Icon(painter = painterResource(id = R.drawable.img), contentDescription = null)
-            Text(
-                text = restaurant.deliveryTime.toString()
+        items(items = restaurants, key = { item -> item.id }) { restaurant: Restaurant ->
+            val modifier = Modifier.animateItem()
+            RestaurantItem(
+                restaurant = restaurant, navigate = navigateToRestaurantDetails, modifier = modifier
             )
         }
-
     }
-
 }
 
 @Composable
-fun Filter() {
-
-    Row() {
-        AsyncImage(
-            model = "https://food-delivery.umain.io/images/restaurant/burgers.png",
-            contentDescription = null,
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(color = Color.Red)
-        )
-        Text(
-            text = "1 hour"
-        )
+private fun TagList(
+    tags: List<TagSelection>,
+    addFilter: (TagSelection) -> Unit,
+    removeFilter: (TagSelection) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    LazyRow(modifier = modifier.padding(vertical = 16.dp)) {
+        items(items = tags) { tagSelection: TagSelection ->
+            FilterItem(tagSelection = tagSelection, onFilterSelected = { selectedTag ->
+                addFilter(selectedTag)
+            }, onFilterUnSelected = { unSelectedTag ->
+                removeFilter(unSelectedTag)
+            })
+        }
     }
-
 }
 
-@Preview
 @Composable
-fun RestaurantPreview() {
-    RestaurantItem(Restaurant(
-        imageUrl = "",
-        rating = 2.5,
-        filterIds = listOf(),
-        tags = listOf(),
-        name = "bita",
-        deliveryTime = 12
-    ), {})
+fun Logo(modifier: Modifier = Modifier) {
+    Image(
+        modifier = modifier.size(54.dp),
+        painter = painterResource(id = R.drawable.umain_logo),
+        contentDescription = null
+    )
 }
 
-@Preview
-@Composable
-fun FilterPreview() {
-}

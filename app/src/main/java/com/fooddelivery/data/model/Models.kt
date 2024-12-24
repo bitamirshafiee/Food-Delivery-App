@@ -5,6 +5,7 @@ import com.google.gson.annotations.SerializedName
 data class RestaurantsResponse(@SerializedName("restaurants") val restaurants: List<RestaurantResponse>)
 
 data class RestaurantResponse(
+    @SerializedName("id") val id: String,
     @SerializedName("image_url") val imageUrl: String,
     @SerializedName("rating") val rating: Double,
     @SerializedName("filterIds") val filterIds: List<String>,
@@ -17,8 +18,6 @@ data class TagResponse(
     @SerializedName("image_url") val imageUrl: String,
     @SerializedName("name") val name: String
 )
-
-data class TagRequest(@SerializedName("id") val id: String)
 
 data class RestaurantStatusResponse(
     @SerializedName("restaurant_id") val id: String,

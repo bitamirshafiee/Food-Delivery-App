@@ -75,6 +75,7 @@ class RestaurantRepositoryTest {
 
 fun getFakeRestaurants() = listOf(
     RestaurantResponse(
+        id="id1",
         imageUrl = "",
         rating = 4.5,
         filterIds = listOf(),
@@ -82,6 +83,7 @@ fun getFakeRestaurants() = listOf(
         deliveryTime = 2
     ),
     RestaurantResponse(
+        id="id2",
         imageUrl = "",
         rating = 3.7,
         filterIds = listOf(),
@@ -89,6 +91,7 @@ fun getFakeRestaurants() = listOf(
         deliveryTime = 4
     ),
     RestaurantResponse(
+        id="id3",
         imageUrl = "",
         rating = 5.00,
         filterIds = listOf(),
