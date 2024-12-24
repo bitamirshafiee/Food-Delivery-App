@@ -19,8 +19,6 @@ data class TagResponse(
     @SerializedName("name") val name: String
 )
 
-data class TagRequest(@SerializedName("id") val id: String)
-
 data class RestaurantStatusResponse(
     @SerializedName("restaurant_id") val id: String,
     @SerializedName("is_currently_open") val isOpen: Boolean
