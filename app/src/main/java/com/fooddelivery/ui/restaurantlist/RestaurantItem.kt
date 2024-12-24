@@ -34,8 +34,7 @@ fun RestaurantItem(
 ) {
     Card(
         modifier = modifier
-            .padding(vertical = 8.dp)
-            .background(color = Color.White),
+            .padding(vertical = 8.dp),
         colors = CardDefaults.cardColors(
             containerColor = Color.White,
         ),

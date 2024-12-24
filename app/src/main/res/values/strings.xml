@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Food Delivery</string>
+    <string name="str_is_open">Open</string>
+    <string name="str_is_closed">Closed</string>
 </resources>

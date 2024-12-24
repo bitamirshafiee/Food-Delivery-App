@@ -136,3 +136,13 @@ data class Tag(val id: String, val imageUrl: String, val name: String) : Parcela
 data class TagSelection(
     val tag: Tag, var isSelected: Boolean = false
 )
+
+fun getDefaultRestaurant() = Restaurant(
+    id = "",
+    imageUrl = "",
+    rating = 0.0,
+    filterIds = listOf(),
+    tags = listOf(),
+    name = "",
+    deliveryTime = 0
+)
