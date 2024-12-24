@@ -2,4 +2,12 @@
     <string name="app_name">Food Delivery</string>
     <string name="str_is_open">Open</string>
     <string name="str_is_closed">Closed</string>
+    <string name="str_error_unauthorized">unAuthorized</string>
+    <string name="str_error_format">Error in format</string>
+    <string name="str_error_EOF">Error in data conversion</string>
+    <string name="str_error_io">No Internet</string>
+    <string name="str_error_json_syntax">Error in data conversion</string>
+    <string name="str_error_undefined">Error happened</string>
+    <string name="retry_label">Retry</string>
+    <string name="an_error_has_occurred">An error has occurred.</string>
 </resources>

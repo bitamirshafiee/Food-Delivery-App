@@ -91,6 +91,7 @@ dependencies {
     implementation(libs.kotlin.serialization)
     implementation(libs.hilt.android)
     kapt(libs.hilt.android.compiler)
+    implementation(libs.kotlinx.collections.immutable)
     implementation(libs.hilt.navigation.compose)
     testImplementation(libs.coroutines.test)
     testImplementation(libs.mockk)

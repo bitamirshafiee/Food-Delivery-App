@@ -18,6 +18,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import com.fooddelivery.R
+import com.fooddelivery.ui.commonui.ScreenError
+import com.fooddelivery.ui.commonui.ScreenLoading
 import com.fooddelivery.ui.restaurantlist.Restaurant
 import com.fooddelivery.ui.restaurantlist.Tag
 import com.fooddelivery.utils.separateListWithDots
@@ -29,15 +31,15 @@ fun RestaurantDetails(viewModel: RestaurantDetailsViewModel) {
     val restaurantDetailsUIState by viewModel.state.collectAsStateWithLifecycle()
 
     when (val uiState = restaurantDetailsUIState) {
-        is RestaurantDetailsUIState.Loading -> {}
-        is RestaurantDetailsUIState.Error -> {}
+        is RestaurantDetailsUIState.Loading -> { ScreenLoading() }
+        is RestaurantDetailsUIState.Error -> {
+            ScreenError(onRetry = viewModel::onRetry, errorMessage = uiState.errorMessage)}
         is RestaurantDetailsUIState.RestaurantDetails -> {
             RestaurantInfo(uiState.restaurant, uiState.isOpen)
         }
     }
 
 }
-//TODO persistentlist
 
 @Composable
 private fun RestaurantInfo(
@@ -109,3 +111,4 @@ fun RestaurantStatus(isOpen: Boolean, modifier: Modifier = Modifier) {
         color = Color(0xFF2ECC71)
     )
 }
+

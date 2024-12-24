@@ -5,7 +5,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.fooddelivery.data.repository.RestaurantRepository
 import com.fooddelivery.data.repository.NetworkResult
+import com.fooddelivery.utils.errorHandlerHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -23,15 +25,17 @@ class RestaurantsViewModel @Inject constructor(private val repository: Restauran
     private val _restaurants = MutableStateFlow(listOf<Restaurant>())
 
     private val _tags = MutableStateFlow(listOf<TagSelection>())
-    val tags: StateFlow<List<TagSelection>> = _tags
 
     private val _selectedTags = MutableStateFlow(listOf<Tag>())
 
     private val _filteredList = MutableStateFlow(listOf<Restaurant>())
-    val filteredList: StateFlow<List<Restaurant>> = _filteredList
+
+    private val _state =
+        MutableStateFlow<RestaurantsUIState>(RestaurantsUIState.Loading)
+    val state: StateFlow<RestaurantsUIState>
+        get() = _state
 
     init {
-        observeTagFilters()
         getRestaurants()
     }
 
@@ -52,6 +56,8 @@ class RestaurantsViewModel @Inject constructor(private val repository: Restauran
                     }
                     _restaurants.value = mainResult
 
+                    observeTagFilters()
+
                     val updatedResultWithTags = mainResult.map { restaurant ->
                         val tags = repository.getTags(restaurant.filterIds).awaitAll().map { tag ->
                             Tag(
@@ -60,14 +66,18 @@ class RestaurantsViewModel @Inject constructor(private val repository: Restauran
                         }
                         restaurant.copy(tags = tags)
                     }
-                    _restaurants.value = updatedResultWithTags
+
                     _tags.value =
                         updatedResultWithTags.map { restaurant -> restaurant.tags }.flatten()
                             .distinct().map { TagSelection(tag = it) }
+                    _restaurants.value = updatedResultWithTags
+
+
                 }
 
                 is NetworkResult.Failure -> {
-                    _restaurants.value
+                    val networkError = errorHandlerHelper(result.throwable)
+                    _state.value = RestaurantsUIState.Error(errorMessage = networkError.errorMessage)
                 }
             }
         }
@@ -84,6 +94,12 @@ class RestaurantsViewModel @Inject constructor(private val repository: Restauran
                 }
             }.collect { filteredList ->
                 _filteredList.value = filteredList
+                _state.value =
+                    RestaurantsUIState.Restaurants(
+                        restaurants = _filteredList.value,
+                        tags = _tags.value
+                    )
+
             }
         }
     }
@@ -115,6 +131,10 @@ class RestaurantsViewModel @Inject constructor(private val repository: Restauran
             }
         }
     }
+
+    fun onRetry(){
+        getRestaurants()
+    }
 }
 
 @Parcelize
@@ -124,7 +144,7 @@ data class Restaurant(
     val imageUrl: String,
     val rating: Double,
     val filterIds: List<String>,
-    val tags: List<Tag> = listOf(),
+    val tags: List<Tag> = persistentListOf(),
     val name: String,
     val deliveryTime: Int
 ) : Parcelable
@@ -135,14 +155,4 @@ data class Tag(val id: String, val imageUrl: String, val name: String) : Parcela
 
 data class TagSelection(
     val tag: Tag, var isSelected: Boolean = false
-)
-
-fun getDefaultRestaurant() = Restaurant(
-    id = "",
-    imageUrl = "",
-    rating = 0.0,
-    filterIds = listOf(),
-    tags = listOf(),
-    name = "",
-    deliveryTime = 0
 )
