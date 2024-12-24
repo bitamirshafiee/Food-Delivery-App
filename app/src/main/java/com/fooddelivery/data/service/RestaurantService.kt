@@ -16,7 +16,7 @@ interface RestaurantService {
         @Path("id") id: String
     ): TagResponse
 
-    @GET
+    @GET("open/{id}")
     suspend fun getRestaurantStatus(
         @Path("id") id: String
     ) : RestaurantStatusResponse

@@ -1,14 +1,11 @@
 package com.fooddelivery.ui.restaurantdetails
 
-import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.fooddelivery.data.repository.NetworkResult
 import com.fooddelivery.data.repository.RestaurantRepository
 import com.fooddelivery.ui.restaurantlist.Restaurant
-import com.fooddelivery.ui.restaurantlist.TagSelection
-import com.fooddelivery.ui.restaurantlist.getDefaultRestaurant
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -22,18 +19,15 @@ class RestaurantDetailsViewModel @Inject constructor(
 ) :
     ViewModel() {
 
-    private val _restaurant = MutableStateFlow(getDefaultRestaurant())
-    val restaurant: StateFlow<Restaurant> = _restaurant
-
-
-    private val _restaurantStatus = MutableStateFlow(false)
-    val restaurantStatus: StateFlow<Boolean> = _restaurantStatus
+    private val _state =
+        MutableStateFlow<RestaurantDetailsUIState>(RestaurantDetailsUIState.Loading)
+    val state: StateFlow<RestaurantDetailsUIState>
+        get() = _state
 
     init {
         val passedRestaurant: Restaurant? = savedStateHandle.get<Restaurant>(key = "restaurant")
-        passedRestaurant?.let {
-            _restaurant.value = it
-            getRestaurantStatus(it)
+        passedRestaurant?.let { restaurant ->
+            getRestaurantStatus(restaurant)
         }
     }
 
@@ -41,10 +35,15 @@ class RestaurantDetailsViewModel @Inject constructor(
         viewModelScope.launch {
             when (val result = repository.isOpen(restaurant.id)) {
                 is NetworkResult.Success -> {
-                    _restaurantStatus.value = result.data.isOpen
+                    _state.value = RestaurantDetailsUIState.RestaurantDetails(
+                        restaurant = restaurant,
+                        isOpen = result.data.isOpen
+                    )
                 }
 
-                is NetworkResult.Failure -> {}
+                is NetworkResult.Failure -> {
+                    _state.value = RestaurantDetailsUIState.Error(result.throwable.message)
+                }
             }
         }
     }

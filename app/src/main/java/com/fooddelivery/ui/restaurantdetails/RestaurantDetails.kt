@@ -8,7 +8,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -16,6 +15,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import com.fooddelivery.R
 import com.fooddelivery.ui.restaurantlist.Restaurant
@@ -26,35 +26,42 @@ import com.fooddelivery.utils.separateListWithDots
 @Composable
 fun RestaurantDetails(viewModel: RestaurantDetailsViewModel) {
 
-    val restaurant by viewModel.restaurant.collectAsState()
-    val isRestaurantOpen by viewModel.restaurantStatus.collectAsState()
+    val restaurantDetailsUIState by viewModel.state.collectAsStateWithLifecycle()
 
-    Column(verticalArrangement = Arrangement.spacedBy((-60).dp)) {
+    when (val uiState = restaurantDetailsUIState) {
+        is RestaurantDetailsUIState.Loading -> {}
+        is RestaurantDetailsUIState.Error -> {}
+        is RestaurantDetailsUIState.RestaurantDetails -> {
+            RestaurantInfo(uiState.restaurant, uiState.isOpen)
+        }
+    }
+
+}
+//TODO persistentlist
+
+@Composable
+private fun RestaurantInfo(
+    restaurant: Restaurant, isRestaurantOpen: Boolean, modifier: Modifier = Modifier
+) {
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy((-60).dp)) {
         RestaurantImage(restaurant.imageUrl)
         RestaurantDetails(restaurant, isRestaurantOpen)
     }
-
 }
 
 @Composable
 private fun RestaurantDetails(
-    restaurant: Restaurant,
-    isRestaurantOpen: Boolean,
-    modifier: Modifier = Modifier
+    restaurant: Restaurant, isRestaurantOpen: Boolean, modifier: Modifier = Modifier
 ) {
     Card(
-        modifier = modifier
-            .padding(horizontal = 16.dp),
-        colors = CardDefaults.cardColors(
+        modifier = modifier.padding(16.dp), colors = CardDefaults.cardColors(
             containerColor = Color.White,
-        ),
-        elevation = CardDefaults.cardElevation(
+        ), elevation = CardDefaults.cardElevation(
             defaultElevation = 4.dp
         )
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
+            modifier = Modifier.fillMaxWidth()
         ) {
             RestaurantName(restaurant.name)
             RestaurantTags(restaurant.tags)
@@ -66,8 +73,7 @@ private fun RestaurantDetails(
 @Composable
 fun RestaurantImage(imageUrl: String, modifier: Modifier = Modifier) {
     AsyncImage(
-        modifier = modifier
-            .fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         model = imageUrl,
         contentScale = ContentScale.FillWidth,
         contentDescription = null
