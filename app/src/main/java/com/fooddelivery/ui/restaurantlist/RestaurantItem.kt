@@ -26,6 +26,8 @@ import com.fooddelivery.R
 import com.fooddelivery.utils.minuteToHour
 import com.fooddelivery.utils.separateListWithDots
 
+
+//Better way to handle styles in Texts would be to create typography for each style in theme Type
 @Composable
 fun RestaurantItem(
     restaurant: Restaurant, navigate: (restaurant: Restaurant) -> Unit,
