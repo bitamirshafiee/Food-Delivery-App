@@ -3,12 +3,12 @@ package com.fooddelivery.ui.restaurantlist
 import android.os.Parcelable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.fooddelivery.data.repository.RestaurantRepository
+import com.fooddelivery.data.model.RestaurantResponse
 import com.fooddelivery.data.repository.NetworkResult
+import com.fooddelivery.data.repository.RestaurantRepository
 import com.fooddelivery.utils.errorHandlerHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.persistentListOf
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -44,43 +44,32 @@ class RestaurantsViewModel @Inject constructor(private val repository: Restauran
         viewModelScope.launch {
             when (val result = repository.getRestaurants()) {
                 is NetworkResult.Success -> {
-                    val mainResult = result.data.restaurants.map { restaurant ->
-                        Restaurant(
-                            id = restaurant.id,
-                            imageUrl = restaurant.imageUrl,
-                            rating = restaurant.rating,
-                            filterIds = restaurant.filterIds,
-                            name = restaurant.name,
-                            deliveryTime = restaurant.deliveryTime
-                        )
-                    }
-                    _restaurants.value = mainResult
-
+                    val mainResult = getMainResult(result.data.restaurants)
                     observeTagFilters()
-
-                    val updatedResultWithTags = mainResult.map { restaurant ->
-                        val tags = repository.getTags(restaurant.filterIds).awaitAll().map { tag ->
-                            Tag(
-                                id = tag.id, imageUrl = tag.imageUrl, name = tag.name
-                            )
-                        }
-                        restaurant.copy(tags = tags)
-                    }
-
-                    _tags.value =
-                        updatedResultWithTags.map { restaurant -> restaurant.tags }.flatten()
-                            .distinct().map { TagSelection(tag = it) }
-                    _restaurants.value = updatedResultWithTags
-
-
+                    getUpdatedResultWithTags(mainResult)
                 }
-
                 is NetworkResult.Failure -> {
                     val networkError = errorHandlerHelper(result.throwable)
-                    _state.value = RestaurantsUIState.Error(errorMessage = networkError.errorMessage)
+                    _state.value =
+                        RestaurantsUIState.Error(errorMessage = networkError.errorMessage)
                 }
             }
         }
+    }
+
+    private fun getMainResult(restaurants: List<RestaurantResponse>): List<Restaurant> {
+        val mainResult = restaurants.map { restaurant ->
+            Restaurant(
+                id = restaurant.id,
+                imageUrl = restaurant.imageUrl,
+                rating = restaurant.rating,
+                filterIds = restaurant.filterIds,
+                name = restaurant.name,
+                deliveryTime = restaurant.deliveryTime
+            )
+        }
+        _restaurants.value = mainResult
+        return mainResult
     }
 
     private fun observeTagFilters() {
@@ -102,6 +91,32 @@ class RestaurantsViewModel @Inject constructor(private val repository: Restauran
 
             }
         }
+    }
+
+    private suspend fun getUpdatedResultWithTags(mainResult: List<Restaurant>) {
+        val updatedResultWithTags = mainResult.map { restaurant ->
+
+            when (val result1 = repository.getAsyncTags(restaurant.filterIds)) {
+                is NetworkResult.Success -> {
+                    val tags = result1.data.map { tag ->
+                        Tag(id = tag.id, imageUrl = tag.imageUrl, name = tag.name)
+                    }
+                    restaurant.copy(tags = tags)
+                }
+
+                is NetworkResult.Failure -> {
+                    restaurant
+                }
+            }
+        }
+        showTopTagFilter(updatedResultWithTags)
+        _restaurants.value = updatedResultWithTags
+    }
+
+    private fun showTopTagFilter(updatedResultWithTags: List<Restaurant>) {
+        _tags.value =
+            updatedResultWithTags.map { restaurant -> restaurant.tags }.flatten()
+                .distinct().map { TagSelection(tag = it) }
     }
 
     fun addFilterToSelectedFilterList(tagSelection: TagSelection) {
@@ -132,7 +147,7 @@ class RestaurantsViewModel @Inject constructor(private val repository: Restauran
         }
     }
 
-    fun onRetry(){
+    fun onRetry() {
         getRestaurants()
     }
 }
