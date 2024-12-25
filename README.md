@@ -10,7 +10,8 @@ design.
 
 | Restaurant List  | Filter Restaurants | Restaurant's Details
 | ------------- | ------------- | ------------- |
-| ![Screenshot_20241225_204408_Food Delivery](https://github.com/user-attachments/assets/47e70586-4d44-4dfd-b661-21b40a88e575) | ![Screenshot_20241225_204433_Food Delivery](https://github.com/user-attachments/assets/4f5d0c96-c566-4e09-b7e8-2f2b0f9ed7de) | ![Screenshot_20241225_204455_Food Delivery](https://github.com/user-attachments/assets/ba33bcce-6ecc-4c59-839d-7c23d8ea7b3c) |
+| ![Screenshot_20241225_204408_Food Delivery](https://github.com/user-attachments/assets/47e70586-4d44-4dfd-b661-21b40a88e575) | ![Screenshot_20241225_204433_Food Delivery](https://github.com/user-attachments/assets/4f5d0c96-c566-4e09-b7e8-2f2b0f9ed7de) | ![Screenshot_20241225_214411_Food Delivery](https://github.com/user-attachments/assets/2cae62f0-fff9-4b03-bbac-593092dc08d0) |
+
 
 
 It will show a list of restaurants and a tag list on top which you can filter restaurants according
