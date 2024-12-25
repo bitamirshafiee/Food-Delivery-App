@@ -1,17 +1,21 @@
 package com.fooddelivery.ui.restaurantdetails
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -26,16 +30,21 @@ import com.fooddelivery.utils.separateListWithDots
 
 
 @Composable
-fun RestaurantDetails(viewModel: RestaurantDetailsViewModel) {
+fun RestaurantDetails(viewModel: RestaurantDetailsViewModel, navigateBack: () -> Unit) {
 
     val restaurantDetailsUIState by viewModel.state.collectAsStateWithLifecycle()
 
     when (val uiState = restaurantDetailsUIState) {
-        is RestaurantDetailsUIState.Loading -> { ScreenLoading() }
+        is RestaurantDetailsUIState.Loading -> {
+            ScreenLoading()
+        }
+
         is RestaurantDetailsUIState.Error -> {
-            ScreenError(onRetry = viewModel::onRetry, errorMessage = uiState.errorMessage)}
+            ScreenError(onRetry = viewModel::onRetry, errorMessage = uiState.errorMessage)
+        }
+
         is RestaurantDetailsUIState.RestaurantDetails -> {
-            RestaurantInfo(uiState.restaurant, uiState.isOpen)
+            RestaurantInfo(uiState.restaurant, uiState.isOpen, navigateBack)
         }
     }
 
@@ -43,11 +52,22 @@ fun RestaurantDetails(viewModel: RestaurantDetailsViewModel) {
 
 @Composable
 private fun RestaurantInfo(
-    restaurant: Restaurant, isRestaurantOpen: Boolean, modifier: Modifier = Modifier
+    restaurant: Restaurant, isRestaurantOpen: Boolean,
+    navigateBack: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy((-60).dp)) {
-        RestaurantImage(restaurant.imageUrl)
-        RestaurantDetails(restaurant, isRestaurantOpen)
+    Box(modifier = modifier) {
+        Column(verticalArrangement = Arrangement.spacedBy((-60).dp)) {
+            RestaurantImage(restaurant.imageUrl)
+            RestaurantDetails(restaurant, isRestaurantOpen)
+        }
+        Icon(
+            modifier = Modifier
+                .padding(24.dp)
+                .clickable { navigateBack() },
+            painter = painterResource(id = R.drawable.arrow_down),
+            contentDescription = null
+        )
     }
 }
 
