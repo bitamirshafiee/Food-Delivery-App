@@ -6,8 +6,8 @@ import com.fooddelivery.data.model.TagResponse
 import com.fooddelivery.data.service.ServiceProvider
 import com.fooddelivery.di.IoDispatcher
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -15,7 +15,7 @@ import javax.inject.Inject
 abstract class RestaurantRepository {
 
     abstract suspend fun getRestaurants(): NetworkResult<RestaurantsResponse>
-    abstract suspend fun getTags(tagIds: List<String>): List<Deferred<TagResponse>>
+    abstract suspend fun getAsyncTags(tagIds: List<String>): NetworkResult<List<TagResponse>>
     abstract suspend fun isOpen(id: String): NetworkResult<RestaurantStatusResponse>
 }
 
@@ -38,10 +38,16 @@ class RestaurantRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getTags(tagIds: List<String>): List<Deferred<TagResponse>> =
+    override suspend fun getAsyncTags(tagIds: List<String>): NetworkResult<List<TagResponse>> =
         coroutineScope {
-            tagIds.map {
-                async(ioDispatcher) { restaurantService.getTag(it) }
+            try {
+                val tags = tagIds.map {
+                    async(ioDispatcher) { restaurantService.getTag(it) }
+                }.awaitAll()
+                NetworkResult.Success(tags)
+
+            } catch (exception: Exception) {
+                NetworkResult.Failure(exception)
             }
         }
 
@@ -54,6 +60,8 @@ class RestaurantRepositoryImpl @Inject constructor(
             }
         }
     }
+
+
 
 
 }
