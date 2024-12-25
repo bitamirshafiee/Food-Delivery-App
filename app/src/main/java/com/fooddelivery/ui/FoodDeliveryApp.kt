@@ -34,8 +34,7 @@ fun FoodDeliveryApp(
 
         composable<Route.RestaurantList> {
             val viewModel = hiltViewModel<RestaurantsViewModel>()
-            Restaurants(
-                viewModel = viewModel,
+            Restaurants(viewModel = viewModel,
                 navigateToRestaurantDetails = { restaurant: Restaurant ->
                     navController.navigate(Route.RestaurantDetails(restaurant))
                 })
@@ -47,7 +46,7 @@ fun FoodDeliveryApp(
             )
         ) {
             val viewModel = hiltViewModel<RestaurantDetailsViewModel>()
-            RestaurantDetails(viewModel = viewModel)
+            RestaurantDetails(viewModel = viewModel) { navController.popBackStack() }
         }
     }
 }
