@@ -28,3 +28,7 @@ list and update the UI.
 ## How to install the app
 
 Just clone the repository, build the project and then you can easily run it on a device or emulator.
+
+## Future todos
+
+What I would have done on the production project would be writing more Junit tests and also UI tests, I can write UI tests in compose and I believe sometimes UI tests are more important than other tests. and also writing CD/CD codefor automating testing and also deploying using tools like fastlane.
